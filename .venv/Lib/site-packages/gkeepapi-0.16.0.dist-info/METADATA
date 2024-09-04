@@ -1,0 +1,71 @@
+Metadata-Version: 2.1
+Name: gkeepapi
+Version: 0.16.0
+Summary: An unofficial Google Keep API client
+Author-email: Kai <z@kwi.li>
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Development Status :: 4 - Beta
+Classifier: Operating System :: OS Independent
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Dist: gpsoauth >= 1.1.0
+Requires-Dist: future >= 0.16.0
+Requires-Dist: ruff>=0.1.14 ; extra == "dev"
+Requires-Dist: coverage>=7.2.5 ; extra == "dev"
+Requires-Dist: Sphinx>=7.2.6 ; extra == "dev"
+Project-URL: Bug Tracker, https://github.com/kiwiz/gkeepapi/issues
+Project-URL: Homepage, https://github.com/kiwiz/gkeepapi
+Provides-Extra: dev
+
+gkeepapi
+========
+
+[![Documentation Status](https://readthedocs.org/projects/gkeepapi/badge/?version=latest)](http://gkeepapi.readthedocs.io/en/latest/?badge=latest)
+[![Gitter chat](https://badges.gitter.im/gkeepapi/Lobby.png)](https://gitter.im/gkeepapi/Lobby)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/4386792a941a156a14f0/test_coverage)](https://codeclimate.com/github/kiwiz/gkeepapi/test_coverage)
+
+## NOTICE: Google offers an official [API](https://developers.google.com/keep/api) which might be an option if you have an Enterprise account. 🎉
+
+An unofficial client for the [Google Keep](https://keep.google.com) API.
+
+```python
+import gkeepapi
+
+# Obtain a master token for your account (see docs)
+master_token = '...'
+
+keep = gkeepapi.Keep()
+success = keep.authenticate('user@gmail.com', 'master_token')
+
+note = keep.createNote('Todo', 'Eat breakfast')
+note.pinned = True
+note.color = gkeepapi.node.ColorValue.Red
+keep.sync()
+```
+
+*gkeepapi is not supported nor endorsed by Google.*
+
+The code is pretty stable at this point, but you should always make backups. The project is under development, so feel free to open an issue if you have questions, see any bugs or have a feature request. PRs are welcome too!
+
+## Installation
+
+```
+pip install gkeepapi
+```
+
+## Documentation
+
+The docs are available on [Read the Docs](https://gkeepapi.readthedocs.io/en/latest/).
+
+## Todo (Open an issue if you'd like to help!)
+
+- Reminders
+    - `reminders`
+- Figure out all possible values for `TaskAssist._suggest` (Same as CategoryValue?)
+- Figure out all possible values for `NodeImage._extraction_status` (integer)
+- Blobs (Drawings/Images/Recordings)
+
