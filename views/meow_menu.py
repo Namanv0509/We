@@ -1,8 +1,9 @@
 import streamlit as st
+import json_file_storage as storage
 
-# Initialize session state for the to-do list
-if 'todo_list' not in st.session_state:
-    st.session_state.todo_list = []
+
+# Load tasks from JSON file
+tasks = storage.load_tasks()
 
 st.title("Meowneu👨‍🍳👩‍🍳")
 
@@ -12,15 +13,16 @@ new_task = st.text_input("Add a new task")
 # Button to add the task
 if st.button("Bhogu Appender"):
     if new_task:
-        st.session_state.todo_list.append({"task": new_task, "done": False})
+        storage.add_task(new_task)
         st.success(f"Yummy '{new_task}' added!")
+        tasks = storage.load_tasks()  # Reload tasks after adding
     else:
         st.warning("You Ordering Empty Plate or What💀.")
 
 st.write("---")
 
 # Sort tasks so that incomplete tasks come first
-sorted_tasks = sorted(st.session_state.todo_list, key=lambda x: x['done'])
+sorted_tasks = sorted(tasks, key=lambda x: x['done'])
 
 # Display current tasks
 st.subheader("👉👈Our List")
@@ -35,7 +37,8 @@ if sorted_tasks:
         # Checkbox to mark task as done/undone
         checkbox_label = "Done" if not is_done else "Once More"
         if st.checkbox(checkbox_label, key=f"done_{idx}"):
-            st.session_state.todo_list[idx]["done"] = not is_done
+            storage.update_task(sorted_tasks.index(task), not is_done)
+            tasks = storage.load_tasks()  # Reload tasks after updating
 
         # Display task with a strikethrough if done
         if is_done:
@@ -45,11 +48,12 @@ if sorted_tasks:
 
         # Button to delete the task
         if st.button("Oppsies", key=f"delete_{idx}"):
-            tasks_to_remove.append(idx)
+            tasks_to_remove.append(sorted_tasks.index(task))
 
     # Remove tasks after iterating
     if tasks_to_remove:
         for idx in reversed(tasks_to_remove):
-            del st.session_state.todo_list[idx]
+            storage.delete_task(idx)
+            tasks = storage.load_tasks()  # Reload tasks after deleting
 else:
     st.write("Menu is empty!?!?!?!")
