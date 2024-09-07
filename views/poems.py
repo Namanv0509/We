@@ -116,4 +116,4 @@ if st.session_state.poems:
         """
 
         
-        cols[i % 3].markdown(poem_card, unsafe_allow_html=False)
+        cols[i % 3].markdown(poem_card, unsafe_allow_html=True)
