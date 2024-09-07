@@ -1,14 +1,16 @@
 import streamlit as st
 from datetime import datetime
 import os
+import json
 from PIL import Image
 
-# Ensure the directory exists for saving uploaded images and poems
-if not os.path.exists("uploaded_images"):
-    os.makedirs("uploaded_images")
+# File paths
+poems_json_file = "saved_poems.json"
+uploaded_images_folder = "uploaded_images"
 
-if not os.path.exists("saved_poems"):
-    os.makedirs("saved_poems")
+# Ensure the directory exists for saving uploaded images
+if not os.path.exists(uploaded_images_folder):
+    os.makedirs(uploaded_images_folder)
 
 # Predefined images for selection
 predefined_images = {
@@ -19,28 +21,29 @@ predefined_images = {
     # Add paths to your predefined images here
 }
 
-# Session state initialization
-if 'poems' not in st.session_state:
-    st.session_state.poems = []
+# Load poems from the JSON file
+def load_poems():
+    if os.path.exists(poems_json_file):
+        with open(poems_json_file, 'r') as f:
+            return json.load(f)
+    return []
+
+# Save poems to the JSON file
+def save_poems(poems):
+    with open(poems_json_file, 'w') as f:
+        json.dump(poems, f, indent=4)
 
 # Function to save user-uploaded images and resize them
 def save_uploaded_file(uploaded_file):
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
         image = image.resize((50, 50))  # Resize image to 50x50 pixels for profile picture
-        save_path = os.path.join("uploaded_images", uploaded_file.name)
+        save_path = os.path.join(uploaded_images_folder, uploaded_file.name)
         image.save(save_path)
         return save_path
     return None
 
-# Function to save the poem to a file
-def save_poem_to_file(title, poem_text):
-    file_path = os.path.join("saved_poems", f"{title}.txt")
-    with open(file_path, "w") as f:
-        f.write(poem_text)
-    return file_path
-
-# Function to add a new poem card
+# Function to add a new poem
 def add_poem(title, poem_text, profile_image=None):
     new_poem = {
         "title": title,
@@ -49,9 +52,11 @@ def add_poem(title, poem_text, profile_image=None):
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     st.session_state.poems.insert(0, new_poem)  # Add new poem at the top
+    save_poems(st.session_state.poems)  # Save the updated poems list to JSON
 
-    # Save the poem to a text file
-    save_poem_to_file(title, poem_text)
+# Initialize session state
+if 'poems' not in st.session_state:
+    st.session_state.poems = load_poems()  # Load poems from JSON file at the start
 
 # Title of the app
 st.title("Poetry Corner")
@@ -76,7 +81,7 @@ with st.form(key='poem_form'):
 
     submit_button = st.form_submit_button(label='Add Poem')
 
-# Add poem to the session state
+# Add poem to the session state and save to JSON
 if submit_button and title and poem_text:
     add_poem(title, poem_text, profile_image)
     st.success(f"Poem '{title}' has been added and saved!")
