@@ -3,9 +3,12 @@ from datetime import datetime
 import os
 from PIL import Image
 
-# Ensure the directory exists for saving uploaded images
+# Ensure the directory exists for saving uploaded images and poems
 if not os.path.exists("uploaded_images"):
     os.makedirs("uploaded_images")
+
+if not os.path.exists("saved_poems"):
+    os.makedirs("saved_poems")
 
 # Predefined images for selection
 predefined_images = {
@@ -17,8 +20,8 @@ predefined_images = {
 }
 
 # Session state initialization
-if 'cards' not in st.session_state:
-    st.session_state.cards = []
+if 'poems' not in st.session_state:
+    st.session_state.poems = []
 
 # Function to save user-uploaded images and resize them
 def save_uploaded_file(uploaded_file):
@@ -30,23 +33,33 @@ def save_uploaded_file(uploaded_file):
         return save_path
     return None
 
-# Function to add a new card
-def add_card(title, description, profile_image=None):
-    new_card = {
+# Function to save the poem to a file
+def save_poem_to_file(title, poem_text):
+    file_path = os.path.join("saved_poems", f"{title}.txt")
+    with open(file_path, "w") as f:
+        f.write(poem_text)
+    return file_path
+
+# Function to add a new poem card
+def add_poem(title, poem_text, profile_image=None):
+    new_poem = {
         "title": title,
-        "description": description,
+        "poem": poem_text,
         "profile_image": profile_image,
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
-    st.session_state.cards.insert(0, new_card)  # Add new card at the top
+    st.session_state.poems.insert(0, new_poem)  # Add new poem at the top
+
+    # Save the poem to a text file
+    save_poem_to_file(title, poem_text)
 
 # Title of the app
-st.title("Interactive Cards with Profile Pictures")
+st.title("Poetry Corner")
 
-# Input form for adding a new card
-with st.form(key='card_form'):
-    title = st.text_input("Card Title")
-    description = st.text_area("Card Description")
+# Input form for adding a new poem
+with st.form(key='poem_form'):
+    title = st.text_input("Poem Title")
+    poem_text = st.text_area("Your Poem")
 
     # Dropdown to select a predefined profile picture
     selected_image = st.selectbox("Select a Profile Picture", options=list(predefined_images.keys()))
@@ -61,17 +74,18 @@ with st.form(key='card_form'):
     elif predefined_images[selected_image] is not None:
         profile_image = predefined_images[selected_image]
 
-    submit_button = st.form_submit_button(label='Add Card')
+    submit_button = st.form_submit_button(label='Add Poem')
 
-# Add card to the session state
-if submit_button and title and description:
-    add_card(title, description, profile_image)
+# Add poem to the session state
+if submit_button and title and poem_text:
+    add_poem(title, poem_text, profile_image)
+    st.success(f"Poem '{title}' has been added and saved!")
 
-# Display cards side by side with text vertically arranged
-if st.session_state.cards:
-    cols = st.columns(3)
-    for i, card in enumerate(st.session_state.cards):
-        profile_img_tag = f"<img src='{card['profile_image']}' style='width:50px; height:50px; border-radius:50%; margin-bottom:10px;' />" if card['profile_image'] else ""
+# Display poems side by side with text vertically arranged
+if st.session_state.poems:
+    cols = st.columns(3)  # Three columns to arrange the cards
+    for i, poem in enumerate(st.session_state.poems):
+        profile_img_tag = f"<img src='{poem['profile_image']}' style='width:50px; height:50px; border-radius:50%; margin-bottom:10px;' />" if poem['profile_image'] else ""
         st.markdown(
             f"""
             <div style="
@@ -82,9 +96,9 @@ if st.session_state.cards:
                 margin-bottom: 10px;
             ">
                 {profile_img_tag}
-                <h3 style="margin-bottom: 5px;">{card['title']}</h3>
-                <p style="margin-top: 5px;">{card['description'].replace('\n', '<br>')}</p>
-                <p style="font-size: 0.8em; color: gray;"><strong>Date:</strong> {card['date']}</p>
+                <h3 style="margin-bottom: 5px;">{poem['title']}</h3>
+                <p style="margin-top: 5px;">{poem['poem'].replace('\n', '<br>')}</p>
+                <p style="font-size: 0.8em; color: gray;"><strong>Date:</strong> {poem['date']}</p>
             </div>
             """, 
             unsafe_allow_html=True
