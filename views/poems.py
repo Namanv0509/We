@@ -88,23 +88,32 @@ if submit_button and title and poem_text:
 
 # Display poems side by side with text vertically arranged
 if st.session_state.poems:
-    cols = st.columns(3)  # Three columns to arrange the cards
+    # Display poems side by side
+    cols = st.columns(3)  # Three columns for arrangement
     for i, poem in enumerate(st.session_state.poems):
-        profile_img_tag = f"<img src='{poem['profile_image']}' style='width:50px; height:50px; border-radius:50%; margin-bottom:10px;' />" if poem['profile_image'] else ""
-        st.markdown(
-            f"""
-            <div style="
-                padding: 10px;
-                border: 1px solid #ddd;
-                border-radius: 10px;
-                text-align: center;
-                margin-bottom: 10px;
-            ">
-                {profile_img_tag}
-                <h3 style="margin-bottom: 5px;">{poem['title']}</h3>
-                <p style="margin-top: 5px;">{poem['poem'].replace('\n', '<br>')}</p>
-                <p style="font-size: 0.8em; color: gray;"><strong>Date:</strong> {poem['date']}</p>
-            </div>
-            """, 
-            unsafe_allow_html=True
+        # Create the profile image HTML tag if an image exists
+        profile_img_tag = (
+            f"<img src='{poem['profile_image']}' style='width:50px; height:50px; border-radius:50%; margin-bottom:10px;' />"
+            if poem['profile_image'] else ""
         )
+        
+        # Create the HTML block for the poem card
+        poem_card = f"""
+        <div style="
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 10px;
+        ">
+            {profile_img_tag}
+            <h3 style="margin-bottom: 5px;">{poem['title']}</h3>
+            <p style="margin-top: 5px;">{poem['poem'].replace('\n', '<br>')}</p>
+            <p style="font-size: 0.8em; color: gray;">
+                <strong>Date:</strong> {poem['date']}
+            </p>
+        </div>
+        """
+
+        # Render the HTML for each poem in the appropriate column
+        cols[i % 3].markdown(poem_card, unsafe_allow_html=True)
